@@ -1,4 +1,5 @@
 using FluentValidation;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -13,8 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddProblemDetails();
+builder.Services.AddFluentValidationRulesToSwagger();
 builder.Services.AddValidatorsFromAssemblyContaining<UserDtoValidator>();
 
 
@@ -26,17 +29,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-
-
-    app.UseSwagger(options => { options.RouteTemplate = "openapi/{documentName}.json"; });
-    app.MapSwagger();
-    app.UseSwaggerUI();
-    app.MapScalarApiReference(options =>
-    {
-        options.Title = "User Service API";
-        options.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    });
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -49,7 +45,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapGet("/api/user", (IUserService userService) => { return userService.GetUserList(); });
+app.MapGet("/api/user", (IUserService userService) => { return userService.GetUserList(); }).WithName("GetUserList");
 
 app.MapPost("/api/user", async ([FromServices]IUserService userService, [FromBody]UserDto request, IValidator<UserDto> validator) =>
 {
@@ -62,6 +58,6 @@ app.MapPost("/api/user", async ([FromServices]IUserService userService, [FromBod
     userService.CreateUser(request);
     //Daten verarbeiten
     return Results.Ok();
-});
+}).WithName("CreateUser");
 
 app.Run();

@@ -10,7 +10,7 @@ public class UserService : IUserService
     {
         if (_userList.Count == 0)
         {
-            _userList = new List<UserDto>
+            new List<UserDto>
             {
                 new UserDto("Mustermann", "Max", "max@deinemail.de", "Hallo ich bin Max und code gerne in Java"),
                 new UserDto("Doe", "Jane", "jane@deinemail.de", "Hallo ich bin Jane und code gerne in C#")
